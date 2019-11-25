@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Warsaw.ex demo presentation</title>
+
+  <meta name="description" content="">
+  <meta name="author" content="warsaw.ex">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, use-scalable=no">
+
+  <link rel="stylesheet" href="vendors/reveal.js-3.7.0/css/reveal.css">
+  <link rel="stylesheet" href="vendors/warsawex/styles/violet-dark.css" id="theme">
+  <link rel="stylesheet" href="vendors/reveal.js-3.7.0/lib/css/zenburn.css">
+
+  <style>
+    .white-bg {
+      background-color: white;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="reveal">
+    <div class="slides">
+      <section data-background="vendors/warsawex/images/wallpaper.png">
+      </section>
+
+      <section>
+        <h1>Mocks in Elixir</h1>
+        <h3>2019-11-26</h3>
+      </section>
+
+      <section>
+        <h2>About me</h2>
+        <!-- 1. Photo or avatar -->
+        <img src="images/avatar.jpg" width="200" height="200" />
+
+        <!-- 2. Name -->
+        <h3>Andriy Mykulyak</h3>
+
+        <!-- 3. Contact -->
+        <h4><a href="https://twitter.com/mykulyak">@mykulyak</a></h4>
+
+        <!-- 4. Bio -->
+        <p>Tech Lead @ Fresha/Shedul. <br/> I like Elixir, Python and even JavaScript :)</p>
+      </section>
+
+      <section>
+        <h2>What is mock (object) ?</h2>
+        <blockquote>Mock object mimick the bahaviour of real objects in controlled ways and can be used instead of them in tests.</blockquote>
+      </section>
+
+      <section>
+        <h2>Test doubles</h2>
+        <ul>
+          <li>Stub - only specifies result</li>
+          <li>Mock - specifies predictable result and verifies behaviour</li>
+          <li>Fake - specifies behaviour, possibly simplified</li>
+        </ul>
+      </section>
+
+      <section>
+        <section>
+          <h2>When to mock ?</h2>
+          <ul>
+            <li>real object's behaviour is non-deterministic</li>
+            <li>difficult to reproduce (e.g. whole subsystems)</li>
+            <li>does not yet exist or may change behaviour</li>
+            <li>would need to have support for testing methods</li>
+          </ul>
+        </section>
+  
+        <section>
+          <h2>When to mock - examples</h2>
+          <ul>
+            <li>external subsystems (http, cache, mail, timer)</li>
+            <li>systems yet-to-be developed</li>
+          </ul>
+        </section>
+  
+        <section>
+          <h2>When not to mock</h2>
+          <ul>
+            <li>Do not mock what you do not own</li>
+            <li>Write wrapper, and mock wrapper</li>
+          </ul>
+        </section>
+  
+        <section>
+          <h2>When not to mock - example</h2>
+          <i>TBD: Example showing e.g. call to external service.</i>
+        </section>
+      </section>
+
+      <section>
+        <section>
+          <h2>How to mock</h2>
+          <p>Life is easier when code is modular.</p>
+          <ul>
+            <li>passing dependencies as parameters</li>
+            <li>inject dependencies at runtime</li>
+            <li>resolve at compile time, inject at run-time</li>
+            <li>inject dependencies at compile time</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Dependency injection</h2>
+          <ul>
+            <li>Application.get_env()</li>
+            <li>Modular (https://github.com/surgeventures/modular)</li>
+            <li>Syringe (https://github.com/skylerparr/syringe)</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>How to mock - parameters</h2>
+          <i>TBD: Example showing 1 function with dependency passed in parameter + test</i>
+        </section>
+
+        <section>
+          <h2>How to mock - runtime injection</h2>
+          <i>TBD: Example showing usage of Application.get_env()</i>
+          <i>TBD: Example showing usage of the Pact library https://github.com/elitau/pact_elixir</i>
+        </section>
+
+        <section>
+          <h2>How to mock - compile-time injection</h2>
+          <i>TBD: Example showing usage of the mox https://github.com/plataformatec/mox and modular libraries https://github.com/surgeventures/modular</i>
+        </section>
+      </section>
+
+      <section>
+        <h2>The end</h2>
+        <h1>Thank you !</h1>
+        <h2>Questions please :)</h2>
+      </section>
+
+      <section>
+        <h2>Useful links</h2>
+        <ul>
+          <li><a href="http://blog.plataformatec.com.br/2015/10/mocks-and-explicit-contracts/">Mocks and explicit contracts in Elixir</a></li>
+          <li><a href="https://github.com/plataformatec/mox">Mox library</a></li>
+          <li><a href="https://github.com/skylerparr/syringe">Syringe library</a></li>
+        </ul>
+      </section>
+    </div>
+  </div>
+
+  <script src="vendors/reveal.js-3.7.0/lib/js/head.min.js"></script>
+  <script src="vendors/reveal.js-3.7.0/js/reveal.js"></script>
+  <script>
+    Reveal.initialize({
+      controls: true,
+      progress: true,
+      history: true,
+      center: true,
+      transition: 'slide',
+      dependencies: [
+        // { src: 'lib/js/classList.js', condition: function () { return !document.body.classList; } },
+        // { src: 'plugin/markdown/marked.js', condition: function () { return !!document.querySelector('[data-markdown]'); } },
+        // { src: 'plugin/markdown/markdown.js', condition: function () { return !!document.querySelector('[data-markdown]'); } },
+        { src: 'vendors/reveal.js-3.7.0/plugin/highlight/highlight.js', async: true, callback: function () { hljs.initHighlightingOnLoad(); } },
+        // { src: 'plugin/search/search.js', async: true },
+        // { src: 'plugin/zoom-js/zoom.js', async: true },
+        // { src: 'plugin/notes/notes.js', async: true }
+      ],
+    });
+  </script>
+  <script>
+    (function () {
+      var nodes = document.querySelectorAll('[data-theme-switch]');
+      for (var i = 0; i < nodes.length; i += 1) {
+        nodes.item(i).addEventListener('click', function (event) {
+          event.preventDefault();
+          const themeName = event.target.getAttribute('data-theme');
+          document.getElementById('theme').setAttribute('href', 'vendors/warsawex/styles/' + themeName + '.css');
+        });
+      }
+    })();
+  </script>
+</body>
+
+</html>
