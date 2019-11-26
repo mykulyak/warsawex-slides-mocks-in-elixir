@@ -49,16 +49,23 @@
       </section>
 
       <section>
-        <h2>What is mock (object) ?</h2>
-        <blockquote>Mock object mimick the bahaviour of real objects in controlled ways and can be used instead of them in tests.</blockquote>
+        <h2>What is a mock (object) ?</h2>
+        <p><strong>Mock object</strong> mimick the behaviour of real objects 
+          in controlled ways and can be used instead of them in tests and development.</p>
       </section>
 
       <section>
         <h2>Test doubles</h2>
         <ul>
-          <li>Stub - only specifies result</li>
-          <li>Mock - specifies predictable result and verifies behaviour</li>
-          <li>Fake - specifies behaviour, possibly simplified</li>
+          <li>Stub - provides predictable result</li>
+          <li>
+            Mock - provides predictable result, verifies expectations <br/>
+            <small>e.g. was that func called exactly 2 times ?</small>
+          </li>
+          <li>
+            Fake - specifies simplified behaviour <br />
+            <small>e.g. uploads files into local folder instead of AWS S3</small>
+          </li>
         </ul>
       </section>
 
@@ -66,71 +73,210 @@
         <section>
           <h2>When to mock ?</h2>
           <ul>
-            <li>real object's behaviour is non-deterministic</li>
-            <li>difficult to reproduce (e.g. whole subsystems)</li>
-            <li>does not yet exist or may change behaviour</li>
-            <li>would need to have support for testing methods</li>
+            <li>
+              system has difficult do reproduce behaviour
+              <ul>
+                <li>non-deterministic (time, network, cache, mail)</li>
+                <li>complex (other parts of large applications)</li>
+              </ul>
+            </li>
+            <li>system would need to have support for testing methods</li>
+            <li>system is yet to be developed</li>
           </ul>
         </section>
-  
-        <section>
-          <h2>When to mock - examples</h2>
-          <ul>
-            <li>external subsystems (http, cache, mail, timer)</li>
-            <li>systems yet-to-be developed</li>
-          </ul>
-        </section>
-  
+
         <section>
           <h2>When not to mock</h2>
-          <ul>
-            <li>Do not mock what you do not own</li>
-            <li>Write wrapper, and mock wrapper</li>
-          </ul>
+          <p>Do not mock what you do not own. <br />
+            Instead, write a wrapper and mock that wrapper</p>
         </section>
-  
+
         <section>
           <h2>When not to mock - example</h2>
-          <i>TBD: Example showing e.g. call to external service.</i>
+          <pre>
+            <code class="hljs elixir">
+def set_logo(company_id, image):
+  # 1. upload image on S3
+  #
+  # filename
+  # |> S3.Upload.stream_file
+  # |> S3.upload("bucket", "folder/")
+  # |> ExAws.request #=> {:ok, :done}
+  {:ok, object_key} = LogoUploader.upload(image)
+
+  # 2. update database ...
+  # 3. log stuff ...
+            </code>
+          </pre>
         </section>
       </section>
 
       <section>
         <section>
-          <h2>How to mock</h2>
-          <p>Life is easier when code is modular.</p>
+          <h2>Mocking and code modularity</h2>
           <ul>
-            <li>passing dependencies as parameters</li>
-            <li>inject dependencies at runtime</li>
-            <li>resolve at compile time, inject at run-time</li>
-            <li>inject dependencies at compile time</li>
+            <li>Mocking is easier when our code is modular</li>
+            <li>Separating dependency resolution / creation from their usage increases modularity</li>
+            <li>So, how we can resolve dependencies then ?</li>
           </ul>
         </section>
 
         <section>
           <h2>Dependency injection</h2>
           <ul>
-            <li>Application.get_env()</li>
-            <li>Modular (https://github.com/surgeventures/modular)</li>
-            <li>Syringe (https://github.com/skylerparr/syringe)</li>
+            <li>caller passes dependencies as parameters</li>
+            <li>
+              dependencies are injected into our modules
+              <ul>
+                <li>Application.get_env()</li>
+                <li>Modular (https://github.com/surgeventures/modular)</li>
+                <li>Syringe (https://github.com/skylerparr/syringe)</li>
+              </ul>
+            </li>
           </ul>
         </section>
 
         <section>
-          <h2>How to mock - parameters</h2>
-          <i>TBD: Example showing 1 function with dependency passed in parameter + test</i>
+          <h2>How to mock - via parameters</h2>
+          <pre>
+            <code class="hljs elixir">
+def send_invite(user_id, calendar_id, notifier):
+  {:ok, msg} = notifier.init(user_id, calendar_id)
+  notifier.send(msg)
+
+# using
+def create_user(...):
+  ...
+  invite_user(user_id, calendar_id, MyApp.SmsSender)
+  ...
+            </code>
+          </pre>
         </section>
 
         <section>
-          <h2>How to mock - runtime injection</h2>
-          <i>TBD: Example showing usage of Application.get_env()</i>
-          <i>TBD: Example showing usage of the Pact library https://github.com/elitau/pact_elixir</i>
+          <h2>Injecting using Application.get_env</h2>
+          <pre>
+            <code class="hljs elixir"># config.test.exs
+config :organizer, :file_upload, Organizer.LocalFolderUploader
+# config.prod.exs
+config :organizer, :file_upload, Organizer.S3Uploader
+
+module Organizer.SomeClientModule do
+  @uploader Application.get_env(:organizer, :file_upload)
+
+  def upload_file(filename, data):
+    @uploader.upload(filename, data)
+    # ...
+end
+            </code>
+          </pre>
         </section>
 
         <section>
-          <h2>How to mock - compile-time injection</h2>
-          <i>TBD: Example showing usage of the mox https://github.com/plataformatec/mox and modular libraries https://github.com/surgeventures/modular</i>
+          <h2>Syringe</h2>
+          <a href="https://github.com/avast/syringe">GitHub</a>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          <a href="https://hexdocs.pm/syringe/api-reference.html">Hexdocs</a>
+          <pre>
+            <code class="hljs elixir">defmodule MyApp.ClientModule do
+  use Injector
+  inject MyApp.ServerModule, as: Server
+
+  def do_work, do: Server.do_heavy_work()
+end
+
+# test code
+import Mocker
+
+test "calls server" do
+  mock(MyApp.ServerModule)
+  intercept(MyApp.ServerModule, :do_heavy_work, with: fn -> :ok)
+end
+            </code>
+          </pre>
         </section>
+
+        <section>
+          <h2>Explicit mocks</h2>
+          <p>It makes more sense if know how real entity behaves</p>
+          <ul>
+            <li>Define contract using @behaviour</li>
+            <li>Implement contract in production code</li>
+            <li>Mock whe contract as a whole (in tests)</li>
+            <li>
+              <a href="https://github.com/surgeventures/modular">Modular</a> +
+              <a href="https://github.com/plataformatec/mox">Mox</a> to the rescue
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Modular + Mox (1)</h2>
+          <a href="https://github.com/surgeventures/modular">GitHub</a>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          <a href="https://hexdocs.pm/modular/readme.html">Hexdocs</a>
+          <pre>
+            <code class="hljs elixir"># 1. contract
+defmodule Organizer.Calendars do
+  @callback list(integer()) :: {:ok, [Organizer.Calendar.t]}
+end
+
+# 2. real implementation
+defmodule Organizer.CalendarImpl do
+  @behaviour Organizer.Calendars
+
+  def list(user_id) do
+    query = from c in Organizer.Calendar, where: c.user_id == ^user_id
+    results = Repo.all(query)
+    {:ok, results}
+  end
+end </code>
+          </pre>
+        </section>
+
+        <section>
+          <h2>Modular + Mox (2)</h2>
+          <pre>
+            <code class="hljs elixir">
+# 3. using - production code
+use ModularArea.Access, [Organizer.Calendars]
+
+def index(conn, _params) do
+  with user_id <- get_user_id(conn),
+        calendars <- impl(Organizer.Calendars).list(user_id) do
+    # ... other stuff ...
+  end
+end
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h2>Modular + Mox (3)</h2>
+          <pre>
+            <code class="hljs elixir"> # 4. config.test.exs
+config :modular, area_mocking_enabled: true, areas: [Organizer.Calendars]
+
+# 5. mock helpers
+Modular.AreaAccess.define_mocks()
+Mox.defmock(Organizer.CalendarsMock, for: Organizer.Calendars)
+
+# 6. testing
+test "index/2 returns list of resources" do
+  expect(Organizer.CalendarsMock, :list, 1, fn _ -> {:ok, []} end)
+  # stub(Organizer.CalendarsMock, :list, fn _ -> {:ok, []} end)
+
+  # ... invoking controller code ...
+end
+          </code>
+          </pre>
+        </section>
+      </section>
+
+      <section>
+        <h2>Extra goodies</h2>
+        <p>How to verify contract implementations ?</p>
+        <p>Replace Mox with <a href="https://github.com/msz/hammox">Hammox</a></p>
       </section>
 
       <section>
@@ -143,8 +289,10 @@
         <h2>Useful links</h2>
         <ul>
           <li><a href="http://blog.plataformatec.com.br/2015/10/mocks-and-explicit-contracts/">Mocks and explicit contracts in Elixir</a></li>
-          <li><a href="https://github.com/plataformatec/mox">Mox library</a></li>
-          <li><a href="https://github.com/skylerparr/syringe">Syringe library</a></li>
+          <li><a href="https://github.com/plataformatec/mox">Mox - mocking</a></li>
+          <li><a href="https://github.com/msz/hammox">Hammox - contract verification</a></li>
+          <li><a href="https://github.com/surgeventures/modular/tree/master">Modular - writing modular code</a></li>
+          <li><a href="https://github.com/skylerparr/syringe">Syringe - dependency injection</a></li>
         </ul>
       </section>
     </div>
